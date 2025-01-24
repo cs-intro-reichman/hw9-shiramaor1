@@ -57,8 +57,29 @@ public class MemorySpace {
 	 *        the length (in words) of the memory block that has to be allocated
 	 * @return the base address of the allocated block, or -1 if unable to allocate
 	 */
-	public int malloc(int length) {		
-		//// Replace the following statement with your code
+	public int malloc(int length) {
+
+		if (length <= 0) {
+			throw new IllegalArgumentException("Length must be greater than 0");
+		}
+		for (Node currNode = freeList.getFirst(); currNode != null; currNode = currNode.next) {
+			MemoryBlock block = currNode.block;		
+		
+			if (block.length == length) {
+				freeList.remove(currNode);
+				allocatedList.addLast(block);
+				return block.baseAddress;
+
+			} else if (block.length > length){
+				MemoryBlock allocatedBlock = new MemoryBlock(block.baseAddress, length);
+				allocatedList.addLast(allocatedBlock);
+		
+				block.baseAddress += length;
+				block.length -= length;
+				
+				return allocatedBlock.baseAddress;
+			}	
+		}
 		return -1;
 	}
 
@@ -71,7 +92,20 @@ public class MemorySpace {
 	 *            the starting address of the block to freeList
 	 */
 	public void free(int address) {
-		//// Write your code here
+
+		Node toFreeNode = null;
+		for (Node currNode = freeList.getFirst(); currNode != null; currNode = currNode.next) {
+			
+			if (currNode.block.baseAddress == address) {
+				toFreeNode = currNode;
+				allocatedList.remove(toFreeNode);
+				freeList.addLast(toFreeNode.block);
+				return;	
+			}
+		}
+
+		throw new IllegalArgumentException("No allocated block found with base address: " + address);	
+		
 	}
 	
 	/**
@@ -89,6 +123,20 @@ public class MemorySpace {
 	 */
 	public void defrag() {
 		/// TODO: Implement defrag test
-		//// Write your code here
+		if (freeList.getSize() < 2) {
+			return;
+		}
+		for (Node currNode = freeList.getFirst(); currNode != null; currNode = currNode.next) {
+			for (Node currNode2 = currNode.next; currNode2 != null; currNode2 = currNode2.next) {
+				MemoryBlock currentBlock = currNode.block;
+				MemoryBlock nextBlock = currNode2.block;
+	
+				if (currentBlock.baseAddress + currentBlock.length == nextBlock.baseAddress) {
+					currentBlock.length += nextBlock.length;
+					freeList.remove(currNode2);
+				}
+			}
+		}
 	}
+	
 }
