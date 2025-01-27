@@ -85,26 +85,29 @@ public class LinkedList {
 	 */
 	public void add(int index, MemoryBlock block) {
 		if (index < 0 || index > size) {
-			throw new IllegalArgumentException(
-					"index must be between 0 and size");
+			throw new IllegalArgumentException("index must be between 0 and size");
 		}
-		Node newNode = new Node (block);
+		
+		Node newNode =  new Node(block);
 		if (index == 0){
-			if (size == 0){
-				first = newNode;
-				last = first;
-			} else {
-				newNode.next = first;
-				first = newNode; 
-			} 
-		}else if (index == size) { 
-			last.next = newNode;
-			last = newNode; 
-		} else {
-			newNode.next = getNode(index);
-			getNode(index - 1).next = newNode;
+			newNode.next = this.first;
+			this.first = newNode;
+			if (last == null){
+				this.last = newNode;
+			}
 		}
-		size++; 
+		else if (index == size){
+			this.last.next = newNode;
+			this.last = newNode;
+			
+			
+		} else {
+			Node prevdNode = getNode(index - 1);
+			newNode.next = prevdNode.next;
+			prevdNode.next = newNode;
+			
+		}
+		size ++;
 	}
 
 	/**
@@ -221,13 +224,14 @@ public class LinkedList {
 	 * A textual representation of this list, for debugging.
 	 */
 	public String toString() {
-		if (size == 0) return "()";
+		if (this.first == null) return "";
+        String res = "";
+        Node current = first;
+        while (current != null) {
+            res += current.toString() + " ";
+            current = current.next;
+        }
+        return res;
+    }
 
-		String str = "(";
-		for (int i = 0; i < size; i++) {
-			str += getNode(i) + " ";
-
-		}
-		return str.substring(0, str.length() - 1) + ")";
-	}
 }
